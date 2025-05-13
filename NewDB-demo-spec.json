@@ -3,7 +3,7 @@
   "info": {
     "title": "Business Entity and Device Management API",
     "version": "1.0.0",
-    "description": "API for managing business entities, devices, organizations, and users with a single source of truth in the new database system. The new database is the master data source, with CDC mechanism translating data to the old database system."
+    "description": "API for managing business entities, devices, organizations, and users with a single source of truth in the new database system."
   },
   "servers": [
     {
@@ -21,61 +21,257 @@
         "type": "object",
         "required": ["id", "title"],
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "parent_id": { "type": "integer", "format": "int64", "nullable": true },
-          "title": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the organization"
+          },
+          "parent_id": { 
+            "type": "integer", 
+            "format": "int64", 
+            "nullable": true,
+            "description": "Unique identifier for the parent organization. Used to build a hierarchy of organizations"
+          },
+          "title": { 
+            "type": "string",
+            "description": "The organization's title"
+          },
+          "created_at": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Date and time at which the object was created"
+          },
+          "phone": {
+            "type": "string",
+            "description": "The organization's phone number"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The organization's primary email"
+          }
         }
       },
       "User": {
         "type": "object",
-        "required": ["id", "org_id", "name"],
+        "required": ["id", "org_id", "name", "email", "phone"],
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "org_id": { "type": "integer", "format": "int64" },
-          "name": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the user"
+          },
+          "org_id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the user's organization"
+          },
+          "name": { 
+            "type": "string",
+            "description": "The user's full name"
+          },
+          "created_at": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Date and time at which the user was created"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The user's email"
+          },
+          "phone": {
+            "type": "string",
+            "description": "The user's phone number"
+          },
+          "settings": {
+            "type": "object",
+            "description": "User settings",
+            "properties": {
+              "time_zone": {
+                "type": "string",
+                "description": "ISO timezone ID"
+              },
+              "locale": {
+                "type": "string",
+                "description": "Locale code"
+              }
+            }
+          }
         }
       },
       "Entity": {
         "type": "object",
         "required": ["id", "type_id", "label"],
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
-          "type_id": { "type": "integer", "format": "int64" },
-          "label": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" }
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the entity"
+          },
+          "type_id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the entity's type"
+          },
+          "label": { 
+            "type": "string",
+            "description": "The entity's title/name"
+          },
+          "created_at": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Date and time at which the entity was created"
+          },
+          "fields": {
+            "type": "object",
+            "description": "A map, each key of which is a custom field ID as a string",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The field type"
+                },
+                "value": {
+                  "description": "The field value"
+                }
+              }
+            }
+          }
         }
       },
       "EntityType": {
         "type": "object",
         "required": ["id", "category", "label", "settings"],
         "properties": {
-          "id": { "type": "integer", "format": "int64" },
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the entity type"
+          },
           "category": { 
             "type": "string",
-            "enum": ["business", "geo"]
+            "enum": ["business", "geo"],
+            "description": "The category of entity type"
           },
-          "label": { "type": "string" },
-          "settings": { "type": "object" }
+          "label": { 
+            "type": "string",
+            "description": "The entity type label"
+          },
+          "settings": { 
+            "type": "object",
+            "description": "Describes the layout of sections and fields for the entity type",
+            "properties": {
+              "layout": {
+                "type": "object",
+                "properties": {
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {
+                          "type": "string",
+                          "description": "Section label"
+                        },
+                        "field_order": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Order of fields in the section"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "Inventory": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the inventory"
+          },
+          "label": { 
+            "type": "string",
+            "description": "The inventory's label"
+          },
+          "description": { 
+            "type": "string",
+            "description": "The inventory's description"
+          },
+          "created_at": { 
+            "type": "string", 
+            "format": "date-time",
+            "description": "Date and time at which the inventory was created"
+          }
+        }
+      },
+      "InventoryItem": {
+        "type": "object",
+        "required": ["id", "inventory_id", "entity_id"],
+        "properties": {
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the inventory item"
+          },
+          "inventory_id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the inventory"
+          },
+          "entity_id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the entity"
+          }
         }
       },
       "Error": {
         "type": "object",
         "required": ["code", "message"],
         "properties": {
-          "code": { "type": "string" },
-          "message": { "type": "string" },
-          "correlation_id": { "type": "string", "format": "uuid" },
+          "code": { 
+            "type": "string",
+            "description": "Error code identifier"
+          },
+          "message": { 
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "correlation_id": { 
+            "type": "string", 
+            "format": "uuid",
+            "description": "Unique identifier for correlating the error with server logs"
+          },
           "errors": {
             "type": "array",
+            "description": "Detailed error information for specific parameters",
             "items": {
               "type": "object",
               "required": ["parameter", "code", "message"],
               "properties": {
-                "parameter": { "type": "string" },
-                "code": { "type": "string" },
-                "message": { "type": "string" }
+                "parameter": { 
+                  "type": "string",
+                  "description": "The parameter that caused the error"
+                },
+                "code": { 
+                  "type": "string",
+                  "description": "Error code specific to this parameter"
+                },
+                "message": { 
+                  "type": "string",
+                  "description": "Human-readable error message for this parameter"
+                }
               }
             }
           }
@@ -87,9 +283,13 @@
         "properties": {
           "data": {
             "type": "array",
+            "description": "A list of items returned for the current page, based on the provided pagination and filter parameters",
             "items": { "$ref": "#/components/schemas/GenericItem" }
           },
-          "has_more": { "type": "boolean" }
+          "has_more": { 
+            "type": "boolean",
+            "description": "Indicates whether more items are available beyond the current page. When false, the current result set is the final one"
+          }
         }
       },
       "GenericItem": {
@@ -100,16 +300,81 @@
         "type": "object",
         "required": ["id"],
         "properties": {
-          "id": { "type": "integer", "format": "int64" }
+          "id": { 
+            "type": "integer", 
+            "format": "int64",
+            "description": "Unique identifier for the created resource"
+          }
         }
+      },
+      "FilterCondition": {
+        "type": "object",
+        "description": "A filter condition for advanced querying",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["eq", "neq", "lt", "lte", "gt", "gte", "in", "contains", "between"],
+                "description": "The type of comparison operation"
+              },
+              "field": { 
+                "type": "string",
+                "description": "The field to apply the condition to"
+              },
+              "value": {
+                "description": "The value to compare against"
+              }
+            },
+            "required": ["type", "field", "value"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["and", "or"],
+                "description": "Logical operator for combining conditions"
+              },
+              "conditions": {
+                "type": "array",
+                "description": "List of conditions to combine",
+                "items": {
+                  "$ref": "#/components/schemas/FilterCondition"
+                }
+              }
+            },
+            "required": ["type", "conditions"]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["not"],
+                "description": "Negation operator"
+              },
+              "condition": {
+                "$ref": "#/components/schemas/FilterCondition",
+                "description": "Condition to negate"
+              }
+            },
+            "required": ["type", "condition"]
+          }
+        ]
       }
     },
     "parameters": {
       "IdParam": {
         "name": "id",
-        "in": "query",
+        "in": "path",
         "required": true,
-        "schema": { "type": "integer", "format": "int64" }
+        "description": "Unique identifier for the resource",
+        "schema": { 
+          "type": "integer", 
+          "format": "int64" 
+        }
       },
       "PaginationLimit": {
         "name": "limit",
@@ -235,6 +500,19 @@
           }
         }
       },
+      "Conflict": {
+        "description": "The request conflicts with current state of the server",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/Error" },
+            "example": {
+              "code": "conflict",
+              "message": "Resource already exists or cannot be modified in its current state",
+              "correlation_id": "1a2b3c4d-5678-90ab-cdef-1234567890ab"
+            }
+          }
+        }
+      },
       "NoContent": {
         "description": "The request was successful, but there is no content to return"
       }
@@ -246,10 +524,10 @@
     }
   ],
   "paths": {
-    "/org/create": {
+  "/org/create": {
       "post": {
         "summary": "Create a new organization",
-        "description": "Creates an organization for a dealer",
+        "description": "Adds an organization to your dealer",
         "operationId": "createOrganization",
         "tags": ["Organizations"],
         "requestBody": {
@@ -258,16 +536,25 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["title"],
+                "required": ["title", "phone", "email"],
                 "properties": {
                   "parent_id": {
                     "type": "integer",
                     "format": "int64",
-                    "description": "Unique identifier for the parent organization"
+                    "description": "Unique identifier for the parent organization. Used to build a hierarchy of organizations"
                   },
                   "title": {
                     "type": "string",
                     "description": "The organization's title"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "The organization's phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The organization's primary email"
                   }
                 }
               }
@@ -290,7 +577,8 @@
           },
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" }
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "409": { "$ref": "#/components/responses/Conflict" }
         },
         "security": [
           {
@@ -329,7 +617,9 @@
                   "id": 123,
                   "parent_id": 12,
                   "title": "Solutions Inc.",
-                  "created_at": "2025-06-30T06:46:10Z"
+                  "created_at": "2025-06-30T06:46:10Z",
+                  "phone": "+1 (555) 123-4567",
+                  "email": "contact@solutionsinc.com"
                 }
               }
             }
@@ -380,7 +670,9 @@
                   "id": 123,
                   "parent_id": 12,
                   "title": "Solutions Inc.",
-                  "created_at": "2025-06-30T06:46:10Z"
+                  "created_at": "2025-06-30T06:46:10Z",
+                  "phone": "+1 (555) 123-4567",
+                  "email": "contact@solutionsinc.com"
                 }
               }
             }
@@ -409,7 +701,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["id", "title"],
+                "required": ["id", "title", "phone", "email"],
                 "properties": {
                   "id": {
                     "type": "integer",
@@ -424,44 +716,15 @@
                   "title": {
                     "type": "string",
                     "description": "The organization's title"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": { "$ref": "#/components/responses/NoContent" },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
-        },
-        "security": [
-          {
-            "OAuth2": ["write"]
-          }
-        ]
-      }
-    },
-    "/org/delete": {
-      "post": {
-        "summary": "Delete an organization",
-        "description": "Deletes an organization",
-        "operationId": "deleteOrganization",
-        "tags": ["Organizations"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["id"],
-                "properties": {
-                  "id": {
-                    "type": "integer",
-                    "format": "int64",
-                    "description": "Unique identifier for the organization"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "The organization's phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The organization's primary email"
                   }
                 }
               }
@@ -516,7 +779,9 @@
                       "id": 123,
                       "parent_id": 12,
                       "title": "Solutions Inc.",
-                      "created_at": "2025-06-30T06:46:10Z"
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "phone": "+1 (555) 123-4567",
+                      "email": "contact@solutionsinc.com"
                     }
                   ],
                   "has_more": false
@@ -536,7 +801,7 @@
       },
       "post": {
         "summary": "List organizations with advanced filtering",
-        "description": "Returns all organizations from a dealer with filtering options",
+        "description": "Returns all organizations from a dealer with advanced filtering options",
         "operationId": "listOrganizationsAdvanced",
         "tags": ["Organizations"],
         "requestBody": {
@@ -550,61 +815,28 @@
                     "type": "integer",
                     "default": 100,
                     "minimum": 1,
-                    "maximum": 1000
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
                   },
                   "offset": {
                     "type": "integer",
                     "default": 0,
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
                   },
                   "sort": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sort expression (e.g., 'title,-created_at')"
                   },
                   "q": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "A search query string"
                   },
                   "conditions": {
                     "type": "array",
+                    "description": "Advanced filtering conditions",
                     "items": {
-                      "type": "object",
-                      "oneOf": [
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": ["eq", "neq", "lt", "lte", "gt", "gte", "in", "contains", "between"]
-                            },
-                            "field": { "type": "string" },
-                            "value": {}
-                          },
-                          "required": ["type", "field", "value"]
-                        },
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": ["and", "or"]
-                            },
-                            "conditions": {
-                              "type": "array",
-                              "items": {}
-                            }
-                          },
-                          "required": ["type", "conditions"]
-                        },
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": ["not"]
-                            },
-                            "condition": {
-                              "type": "object"
-                            }
-                          },
-                          "required": ["type", "condition"]
-                        }
-                      ]
+                      "$ref": "#/components/schemas/FilterCondition"
                     }
                   }
                 }
@@ -634,7 +866,9 @@
                       "id": 123,
                       "parent_id": 12,
                       "title": "Solutions Inc.",
-                      "created_at": "2025-06-30T06:46:10Z"
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "phone": "+1 (555) 123-4567",
+                      "email": "contact@solutionsinc.com"
                     }
                   ],
                   "has_more": false
@@ -653,10 +887,52 @@
         ]
       }
     },
+    "/org/delete": {
+      "post": {
+        "summary": "Delete an organization",
+        "description": "Marks an organization as deleted without permanently removing it from the system. This soft delete approach allows recovery of the organization's data upon request to support.",
+        "operationId": "deleteOrganization",
+        "tags": ["Organizations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the organization"
+                  },
+                  "org_confirmation": {
+                    "type": "string",
+                    "description": "The exact name of the organization must be manually provided to confirm critical operations. This field is required only when using the OAuth2 Authorization Code Flow."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
     "/user/create": {
       "post": {
         "summary": "Create a new user",
-        "description": "Creates a user in your organization",
+        "description": "Adds a user to your organization",
         "operationId": "createUser",
         "tags": ["Users"],
         "requestBody": {
@@ -665,11 +941,34 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name"],
+                "required": ["name", "phone", "email", "settings"],
                 "properties": {
                   "name": {
                     "type": "string",
                     "description": "The user's full name"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "The user's phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The user's email"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "User settings",
+                    "properties": {
+                      "time_zone": {
+                        "type": "string",
+                        "description": "ISO timezone ID"
+                      },
+                      "locale": {
+                        "type": "string",
+                        "description": "Locale code"
+                      }
+                    }
                   }
                 }
               }
@@ -693,6 +992,71 @@
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/user/update": {
+      "post": {
+        "summary": "Update an existing user",
+        "description": "Updates the information of an existing user",
+        "operationId": "updateUser",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "name", "phone", "email", "settings"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the user"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The user's full name"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "The user's phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The user's email"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "User settings",
+                    "properties": {
+                      "time_zone": {
+                        "type": "string",
+                        "description": "ISO timezone ID"
+                      },
+                      "locale": {
+                        "type": "string",
+                        "description": "Locale code"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
         },
         "security": [
           {
@@ -731,7 +1095,13 @@
                   "id": 123,
                   "org_id": 21,
                   "name": "Jane Doe",
-                  "created_at": "2025-06-30T06:46:10Z"
+                  "created_at": "2025-06-30T06:46:10Z",
+                  "email": "jane.doe.amsterdam@example.com",
+                  "phone": "+31 6 12345678",
+                  "settings": {
+                    "time_zone": "Europe/Amsterdam",
+                    "locale": "nl_NL"
+                  }
                 }
               }
             }
@@ -740,6 +1110,65 @@
           "401": { "$ref": "#/components/responses/Unauthorized" },
           "403": { "$ref": "#/components/responses/Forbidden" },
           "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },	
+"/user/list": {
+      "get": {
+        "summary": "List users",
+        "description": "Returns all users from an organization",
+        "operationId": "listUsers",
+        "tags": ["Users"],
+        "parameters": [
+          { "$ref": "#/components/parameters/SearchQuery" },
+          { "$ref": "#/components/parameters/PaginationLimit" },
+          { "$ref": "#/components/parameters/PaginationOffset" },
+          { "$ref": "#/components/parameters/SortParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 123,
+                      "org_id": 21,
+                      "name": "Jane Doe",
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "email": "jane.doe.amsterdam@example.com",
+                      "phone": "+31 6 12345678",
+                      "settings": {
+                        "time_zone": "Europe/Amsterdam",
+                        "locale": "nl_NL"
+                      }
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
         },
         "security": [
           {
@@ -748,22 +1177,44 @@
         ]
       },
       "post": {
-        "summary": "Get user by ID",
-        "description": "Returns a user's data by ID",
-        "operationId": "getUserPost",
+        "summary": "List users with advanced filtering",
+        "description": "Returns all users from an organization with advanced filtering options",
+        "operationId": "listUsersAdvanced",
         "tags": ["Users"],
         "requestBody": {
-          "required": true,
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["id"],
                 "properties": {
-                  "id": {
+                  "limit": {
                     "type": "integer",
-                    "format": "int64",
-                    "description": "Unique identifier for the user"
+                    "default": 100,
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "description": "Sort expression (e.g., 'name,-created_at')"
+                  },
+                  "q": {
+                    "type": "string",
+                    "description": "A search query string"
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "description": "Advanced filtering conditions",
+                    "items": {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
                   }
                 }
               }
@@ -772,25 +1223,43 @@
         },
         "responses": {
           "200": {
-            "description": "User details",
+            "description": "List of users",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/User" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
                 },
                 "example": {
-                  "id": 123,
-                  "org_id": 21,
-                  "name": "Jane Doe",
-                  "created_at": "2025-06-30T06:46:10Z"
+                  "data": [
+                    {
+                      "id": 123,
+                      "org_id": 21,
+                      "name": "Jane Doe",
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "email": "jane.doe.amsterdam@example.com",
+                      "phone": "+31 6 12345678",
+                      "settings": {
+                        "time_zone": "Europe/Amsterdam",
+                        "locale": "nl_NL"
+                      }
+                    }
+                  ],
+                  "has_more": false
                 }
               }
             }
           },
           "400": { "$ref": "#/components/responses/BadRequest" },
           "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "403": { "$ref": "#/components/responses/Forbidden" }
         },
         "security": [
           {
@@ -799,52 +1268,10 @@
         ]
       }
     },
-    "/user/update": {
-      "post": {
-        "summary": "Update an existing user",
-        "description": "Updates the information of an existing user",
-        "operationId": "updateUser",
-        "tags": ["Users"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["id", "name"],
-                "properties": {
-                  "id": {
-                    "type": "integer",
-                    "format": "int64",
-                    "description": "Unique identifier for the user"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "The user's full name"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": { "$ref": "#/components/responses/NoContent" },
-          "400": { "$ref": "#/components/responses/BadRequest" },
-          "401": { "$ref": "#/components/responses/Unauthorized" },
-          "403": { "$ref": "#/components/responses/Forbidden" },
-          "404": { "$ref": "#/components/responses/NotFound" }
-        },
-        "security": [
-          {
-            "OAuth2": ["write"]
-          }
-        ]
-      }
-    },
     "/user/delete": {
       "post": {
         "summary": "Delete a user",
-        "description": "Deletes a user",
+        "description": "Marks a user as deleted without immediately removing their data from the system. This soft delete ensures that the user account is deactivated while allowing time for recovery, if necessary. To follow GDPR rules, personal data will be anonymized after 30 days.",
         "operationId": "deleteUser",
         "tags": ["Users"],
         "requestBody": {
@@ -879,12 +1306,176 @@
         ]
       }
     },
-    "/user/list": {
+    "/entity_type/create": {
+      "post": {
+        "summary": "Create a new entity type",
+        "description": "Adds new entity type",
+        "operationId": "createEntityType",
+        "tags": ["Entity Types"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["category", "label", "settings"],
+                "properties": {
+                  "category": {
+                    "type": "string",
+                    "enum": ["business", "geo"],
+                    "description": "The category of entity type"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The entity type label"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "Describes the layout of sections and fields for the entity type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity type created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponse"
+                },
+                "example": {
+                  "id": 123
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/entity_type/update": {
+      "post": {
+        "summary": "Update an entity type",
+        "description": "Updates the entity type",
+        "operationId": "updateEntityType",
+        "tags": ["Entity Types"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "category", "label", "settings"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity type"
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": ["business", "geo"],
+                    "description": "The category of entity type"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The entity type label"
+                  },
+                  "settings": {
+                    "type": "object",
+                    "description": "Describes the layout of sections and fields for the entity type"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/entity_type/read": {
       "get": {
-        "summary": "List users",
-        "description": "Returns all users from an organization",
-        "operationId": "listUsers",
-        "tags": ["Users"],
+        "summary": "Get entity type by ID",
+        "description": "Returns an entity type by ID",
+        "operationId": "getEntityType",
+        "tags": ["Entity Types"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique identifier for the entity type",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity type details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityType"
+                },
+                "example": {
+                  "id": 12,
+                  "category": "business",
+                  "label": "Boats",
+                  "settings": {
+                    "layout": {
+                      "sections": [
+                        {
+                          "label": "Section label",
+                          "field_order": ["label", "location", "131212", "tags", "description"]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/entity_type/list": {
+      "get": {
+        "summary": "List entity types",
+        "description": "Returns all entity types from an organization",
+        "operationId": "listEntityTypes",
+        "tags": ["Entity Types"],
         "parameters": [
           { "$ref": "#/components/parameters/SearchQuery" },
           { "$ref": "#/components/parameters/PaginationLimit" },
@@ -893,7 +1484,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of users",
+            "description": "List of entity types",
             "content": {
               "application/json": {
                 "schema": {
@@ -902,7 +1493,391 @@
                   "properties": {
                     "data": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/User" }
+                      "items": { "$ref": "#/components/schemas/EntityType" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 12,
+                      "category": "business",
+                      "label": "Boats",
+                      "settings": {
+                        "layout": {
+                          "sections": [
+                            {
+                              "label": "Section label",
+                              "field_order": ["label", "location", "131212", "tags", "description"]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      },
+      "post": {
+        "summary": "List entity types with advanced filtering",
+        "description": "Returns all entity types from an organization with advanced filtering options",
+        "operationId": "listEntityTypesAdvanced",
+        "tags": ["Entity Types"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 100,
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "description": "Sort expression (e.g., 'label,-created_at')"
+                  },
+                  "q": {
+                    "type": "string",
+                    "description": "A search query string"
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "description": "Advanced filtering conditions",
+                    "items": {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of entity types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/EntityType" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 12,
+                      "category": "business",
+                      "label": "Boats",
+                      "settings": {
+                        "layout": {
+                          "sections": [
+                            {
+                              "label": "Section label",
+                              "field_order": ["label", "location", "131212", "tags", "description"]
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/entity_type/delete": {
+      "post": {
+        "summary": "Delete an entity type",
+        "description": "Deletes the specified entity type by its ID",
+        "operationId": "deleteEntityType",
+        "tags": ["Entity Types"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity type"
+                  },
+                  "force": {
+                    "type": "boolean",
+                    "description": "If set to true, allows deletion of the entity type even if entities of this type still exist. If false or omitted, the operation will fail if any entities of this type are present."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/entity/create": {
+      "post": {
+        "summary": "Create a new entity",
+        "description": "Adds an entity for the organization",
+        "operationId": "createEntity",
+        "tags": ["Entities"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["type_id", "label"],
+                "properties": {
+                  "type_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity's type"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The entity's title/name"
+                  },
+                  "fields": {
+                    "type": "object",
+                    "description": "Other fields configured for the type",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "The field type"
+                        },
+                        "value": {
+                          "description": "The field value"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entity created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponse"
+                },
+                "example": {
+                  "id": 123
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+"/entity/update": {
+      "post": {
+        "summary": "Update an existing entity",
+        "description": "Updates the information of an existing entity",
+        "operationId": "updateEntity",
+        "tags": ["Entities"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "type_id", "label"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity"
+                  },
+                  "type_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity's type"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The entity's title/name"
+                  },
+                  "fields": {
+                    "type": "object",
+                    "description": "Other fields configured for the type",
+                    "additionalProperties": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "The field type"
+                        },
+                        "value": {
+                          "description": "The field value"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/entity/read": {
+      "get": {
+        "summary": "Get entity by ID",
+        "description": "Returns an entity's data by ID",
+        "operationId": "getEntity",
+        "tags": ["Entities"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique identifier for the entity",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entity details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entity"
+                },
+                "example": {
+                  "id": 123,
+                  "type_id": 21,
+                  "label": "Aspen V6 GTX",
+                  "created_at": "2025-06-30T06:46:10Z",
+                  "fields": {
+                    "131312": {
+                      "type": "text",
+                      "value": "I love text!"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/entity/list": {
+      "get": {
+        "summary": "List entities",
+        "description": "Returns all entities available to the organization",
+        "operationId": "listEntities",
+        "tags": ["Entities"],
+        "parameters": [
+          { "$ref": "#/components/parameters/SearchQuery" },
+          { "$ref": "#/components/parameters/PaginationLimit" },
+          { "$ref": "#/components/parameters/PaginationOffset" },
+          { "$ref": "#/components/parameters/SortParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of entities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Entity" }
                     },
                     "has_more": { "type": "boolean" }
                   }
@@ -911,8 +1886,295 @@
                   "data": [
                     {
                       "id": 123,
-                      "org_id": 21,
-                      "name": "Jane Doe",
+                      "type_id": 21,
+                      "label": "Aspen V6 GTX",
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "fields": {
+                        "131312": {
+                          "type": "text",
+                          "value": "I love text!"
+                        }
+                      }
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      },
+      "post": {
+        "summary": "List entities with advanced filtering",
+        "description": "Returns all entities available to the organization with advanced filtering options",
+        "operationId": "listEntitiesAdvanced",
+        "tags": ["Entities"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 100,
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "description": "Sort expression (e.g., 'label,-created_at')"
+                  },
+                  "q": {
+                    "type": "string",
+                    "description": "A search query string"
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "description": "Advanced filtering conditions",
+                    "items": {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of entities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Entity" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 123,
+                      "type_id": 21,
+                      "label": "Aspen V6 GTX",
+                      "created_at": "2025-06-30T06:46:10Z",
+                      "fields": {
+                        "131312": {
+                          "type": "text",
+                          "value": "I love text!"
+                        }
+                      }
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/entity/delete": {
+      "post": {
+        "summary": "Delete an entity",
+        "description": "Deletes the specified entity by its ID",
+        "operationId": "deleteEntity",
+        "tags": ["Entities"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/create": {
+      "post": {
+        "summary": "Create a new inventory",
+        "description": "Adds a new inventory",
+        "operationId": "createInventory",
+        "tags": ["Inventories"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["label"],
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "description": "The inventory's label"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The inventory's description"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponse"
+                },
+                "example": {
+                  "id": 123
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/read": {
+      "get": {
+        "summary": "Get inventory by ID",
+        "description": "Returns an inventory's data by ID",
+        "operationId": "getInventory",
+        "tags": ["Inventories"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique identifier for the inventory",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventory details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inventory"
+                },
+                "example": {
+                  "id": 12,
+                  "label": "Dutch",
+                  "description": "Dutch branch office",
+                  "created_at": "2025-06-30T06:46:10Z"
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+"/inventory/list": {
+      "get": {
+        "summary": "List inventories",
+        "description": "Returns all inventories",
+        "operationId": "listInventories",
+        "tags": ["Inventories"],
+        "parameters": [
+          { "$ref": "#/components/parameters/SearchQuery" },
+          { "$ref": "#/components/parameters/PaginationLimit" },
+          { "$ref": "#/components/parameters/PaginationOffset" },
+          { "$ref": "#/components/parameters/SortParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of inventories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Inventory" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 12,
+                      "label": "Dutch",
+                      "description": "Dutch branch office",
                       "created_at": "2025-06-30T06:46:10Z"
                     }
                   ],
@@ -932,10 +2194,10 @@
         ]
       },
       "post": {
-        "summary": "List users with advanced filtering",
-        "description": "Returns all users from an organization with filtering options",
-        "operationId": "listUsersAdvanced",
-        "tags": ["Users"],
+        "summary": "List inventories with advanced filtering",
+        "description": "Returns all inventories with advanced filtering options",
+        "operationId": "listInventoriesAdvanced",
+        "tags": ["Inventories"],
         "requestBody": {
           "required": false,
           "content": {
@@ -947,61 +2209,28 @@
                     "type": "integer",
                     "default": 100,
                     "minimum": 1,
-                    "maximum": 1000
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
                   },
                   "offset": {
                     "type": "integer",
                     "default": 0,
-                    "minimum": 0
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
                   },
                   "sort": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "Sort expression (e.g., 'label,-created_at')"
                   },
                   "q": {
-                    "type": "string"
+                    "type": "string",
+                    "description": "A search query string"
                   },
                   "conditions": {
                     "type": "array",
+                    "description": "Advanced filtering conditions",
                     "items": {
-                      "type": "object",
-                      "oneOf": [
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string", 
-                              "enum": ["eq", "neq", "lt", "lte", "gt", "gte", "in", "contains", "between"]
-                            },
-                            "field": { "type": "string" },
-                            "value": {}
-                          },
-                          "required": ["type", "field", "value"]
-                        },
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": ["and", "or"]
-                            },
-                            "conditions": {
-                              "type": "array",
-                              "items": {}
-                            }
-                          },
-                          "required": ["type", "conditions"]
-                        },
-                        {
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": ["not"]
-                            },
-                            "condition": {
-                              "type": "object"
-                            }
-                          },
-                          "required": ["type", "condition"]
-                        }
-                      ]
+                      "$ref": "#/components/schemas/FilterCondition"
                     }
                   }
                 }
@@ -1011,7 +2240,7 @@
         },
         "responses": {
           "200": {
-            "description": "List of users",
+            "description": "List of inventories",
             "content": {
               "application/json": {
                 "schema": {
@@ -1020,7 +2249,7 @@
                   "properties": {
                     "data": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/User" }
+                      "items": { "$ref": "#/components/schemas/Inventory" }
                     },
                     "has_more": { "type": "boolean" }
                   }
@@ -1028,9 +2257,9 @@
                 "example": {
                   "data": [
                     {
-                      "id": 123,
-                      "org_id": 21,
-                      "name": "Jane Doe",
+                      "id": 12,
+                      "label": "Dutch",
+                      "description": "Dutch branch office",
                       "created_at": "2025-06-30T06:46:10Z"
                     }
                   ],
@@ -1046,6 +2275,412 @@
         "security": [
           {
             "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/inventory/update": {
+      "post": {
+        "summary": "Update an existing inventory",
+        "description": "Updates the information of an existing inventory",
+        "operationId": "updateInventory",
+        "tags": ["Inventories"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "label"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory"
+                  },
+                  "label": {
+                    "type": "string",
+                    "description": "The inventory's label"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "The inventory's description"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/delete": {
+      "post": {
+        "summary": "Delete an inventory",
+        "description": "Deletes the specified inventory by its ID",
+        "operationId": "deleteInventory",
+        "tags": ["Inventories"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/item/create": {
+      "post": {
+        "summary": "Create a new inventory item",
+        "description": "Adds an inventory item",
+        "operationId": "createInventoryItem",
+        "tags": ["Inventory Items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["inventory_id", "entity_id"],
+                "properties": {
+                  "inventory_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory"
+                  },
+                  "entity_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory item created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdResponse"
+                },
+                "example": {
+                  "id": 123
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/item/read": {
+      "get": {
+        "summary": "Get inventory item by ID",
+        "description": "Returns an inventory item's data by ID",
+        "operationId": "getInventoryItem",
+        "tags": ["Inventory Items"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique identifier for the inventory item",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Inventory item details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryItem"
+                },
+                "example": {
+                  "id": 123,
+                  "inventory_id": 12,
+                  "entity_id": 234
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/inventory/item/list": {
+      "get": {
+        "summary": "List inventory items",
+        "description": "Returns all inventory items",
+        "operationId": "listInventoryItems",
+        "tags": ["Inventory Items"],
+        "parameters": [
+          { "$ref": "#/components/parameters/SearchQuery" },
+          { "$ref": "#/components/parameters/PaginationLimit" },
+          { "$ref": "#/components/parameters/PaginationOffset" },
+          { "$ref": "#/components/parameters/SortParam" }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of inventory items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/InventoryItem" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 123,
+                      "inventory_id": 12,
+                      "entity_id": 234
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      },
+      "post": {
+        "summary": "List inventory items with advanced filtering",
+        "description": "Returns all inventory items with advanced filtering options",
+        "operationId": "listInventoryItemsAdvanced",
+        "tags": ["Inventory Items"],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 100,
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "Maximum number of items to return"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The index of the first item to return"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "description": "Sort expression"
+                  },
+                  "q": {
+                    "type": "string",
+                    "description": "A search query string"
+                  },
+                  "conditions": {
+                    "type": "array",
+                    "description": "Advanced filtering conditions",
+                    "items": {
+                      "$ref": "#/components/schemas/FilterCondition"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of inventory items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["data", "has_more"],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/InventoryItem" }
+                    },
+                    "has_more": { "type": "boolean" }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "id": 123,
+                      "inventory_id": 12,
+                      "entity_id": 234
+                    }
+                  ],
+                  "has_more": false
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" }
+        },
+        "security": [
+          {
+            "OAuth2": ["read"]
+          }
+        ]
+      }
+    },
+    "/inventory/item/update": {
+      "post": {
+        "summary": "Update an existing inventory item",
+        "description": "Updates the information of an existing inventory item",
+        "operationId": "updateInventoryItem",
+        "tags": ["Inventory Items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id", "inventory_id", "entity_id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory item"
+                  },
+                  "inventory_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory"
+                  },
+                  "entity_id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the entity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
+          }
+        ]
+      }
+    },
+    "/inventory/item/delete": {
+      "post": {
+        "summary": "Delete an inventory item",
+        "description": "Deletes the specified inventory item by its ID",
+        "operationId": "deleteInventoryItem",
+        "tags": ["Inventory Items"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["id"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "format": "int64",
+                    "description": "Unique identifier for the inventory item"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": { "$ref": "#/components/responses/NoContent" },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "403": { "$ref": "#/components/responses/Forbidden" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [
+          {
+            "OAuth2": ["write"]
           }
         ]
       }
