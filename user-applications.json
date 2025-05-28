@@ -369,7 +369,7 @@
           "type": {
             "type": "string",
             "description": "Authorization type identifier",
-            "enum": ["api_key"]
+            "enum": ["Authorization"]
           },
           "hash": {
             "type": "string",
@@ -509,9 +509,9 @@
       }
     },
     "securitySchemes": {
-      "api_key": {
+      "Authorization": {
         "type": "apiKey",
-        "name": "api_key",
+        "name": "Authorization",
         "in": "header",
         "description": "API key authentication"
       }
