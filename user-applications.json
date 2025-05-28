@@ -30,7 +30,7 @@
   ],
   "security": [
     {
-      "api_key": []
+      "Authorization": []
     }
   ],
   "tags": [
